@@ -1,7 +1,7 @@
-import { StatusBar } from "expo-status-bar";
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, Image } from "react-native";
 import Svg, { Rect, ClipPath, Defs, G } from "react-native-svg";
+import { StarIcon } from "./StarIcon";
 type BadgeComponentType = {
     size: number;
     name: string;
@@ -14,10 +14,12 @@ type BadgeComponentType = {
 export default function Badge(props: BadgeComponentType) {
     const styles = StyleSheet.create({
         container: {
+            alignItems: "center",
+            justifyContent: "center",
+
             aspectRatio: 1 / 2,
             width: props.size,
             overflow: "hidden",
-            position: "relative",
 
             backgroundColor: "#fff",
 
@@ -31,6 +33,65 @@ export default function Badge(props: BadgeComponentType) {
             position: "absolute",
             top: 0,
             left: 0,
+        },
+    });
+
+    const portraitSize = 0.8 * props.size;
+    const portraitBorderWidth = 5;
+    const portrait = StyleSheet.create({
+        container: {
+            alignItems: "center",
+            justifyContent: "center",
+
+            aspectRatio: 1 / 1,
+            width: portraitSize,
+            position: "relative",
+
+            borderRadius: 0.1 * portraitSize,
+            borderColor: props.secondaryColor,
+            borderWidth: portraitBorderWidth,
+        },
+        doubleBorder: {
+            width: portraitSize,
+            aspectRatio: 1 / 1,
+            overflow: "hidden",
+
+            position: "absolute",
+            top: -portraitBorderWidth,
+            left: -portraitBorderWidth,
+
+            borderRadius: 0.1 * portraitSize,
+            borderColor: props.primaryColor,
+            borderWidth: portraitBorderWidth,
+
+            transform: [{ scale: 1 - (1.5 * portraitBorderWidth) / portraitSize }], //don't know why these numbers work out
+        },
+        floatingSquare: {
+            width: 0.2 * portraitSize,
+            aspectRatio: 1 / 1,
+
+            position: "absolute",
+            top: -0.25 * 0.2 * portraitSize,
+            right: -0.25 * 0.2 * portraitSize,
+
+            backgroundColor: "orange",
+
+            borderRadius: 0.1 * 0.2 * portraitSize,
+            borderColor: "#fff",
+            borderWidth: 1,
+        },
+        starContainer: {
+            alignItems: "center",
+            justifyContent: "center",
+            flexDirection: "row",
+
+            width: 0.8 * portraitSize,
+
+            position: "absolute",
+            bottom: -0.5 * 0.2 * portraitSize,
+        },
+        star: {
+            flexShrink: 1,
         },
     });
     return (
@@ -57,6 +118,15 @@ export default function Badge(props: BadgeComponentType) {
             </Svg>
             {/* End stripes */}
 
+            <View style={portrait.container}>
+                <Image source={{ uri: props.imageUri }} style={portrait.doubleBorder}></Image>
+                <View style={portrait.floatingSquare}></View>
+                <View style={portrait.starContainer}>
+                    {[...Array(props.stars)].map((_: undefined, i: number) => {
+                        return <StarIcon style={portrait.star} size={0.2 * portraitSize} color={props.primaryColor} stroke={props.secondaryColor} strokeWidth={0.2 * portraitSize}></StarIcon>;
+                    })}
+                </View>
+            </View>
         </View>
     );
 }
