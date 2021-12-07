@@ -1,5 +1,7 @@
 import React, { useRef, useEffect } from "react";
-import { StyleSheet, Text, View, Image, Animated } from "react-native";
+import { StyleSheet, Text, View, Image, PanResponder } from "react-native";
+import { PanGestureHandler } from "react-native-gesture-handler";
+import Animated, { interpolate, useAnimatedGestureHandler, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import Svg, { Rect, ClipPath, Defs, G } from "react-native-svg";
 import { StarIcon } from "./StarIcon";
 type BadgeComponentType = {
@@ -12,32 +14,46 @@ type BadgeComponentType = {
     secondaryColor: string;
 };
 export default function Badge(props: BadgeComponentType) {
-    const animation = useRef(new Animated.Value(0)).current;
+    // const fadeValue = useRef(new Animated.Value(0)).current;
+    const portraitFade = useSharedValue(0);
+    const descFade = useSharedValue(0);
+    const nameFade = useSharedValue(0);
+    const titleFade = useSharedValue(0);
+
+    const gestureEventHandler = useAnimatedGestureHandler({
+
+    });
     useEffect(() => {
-        Animated.timing(animation, {
-            toValue: 1,
-            duration: 1000,
-            useNativeDriver: false,
-        }).start();
+        portraitFade.value = withTiming(1, { duration: 500 }, () => {
+            descFade.value = withTiming(1, { duration: 500 });
+        });
+        nameFade.value = withTiming(1, { duration: 500 }, () => {
+            titleFade.value = withTiming(1, { duration: 500 });
+        });
     }, []);
 
-    const fade1 = animation.interpolate({
-        inputRange: [0, 0.5, 1],
-        outputRange: [0, 1, 1],
-    });
-    const translate1 = animation.interpolate({
-        inputRange: [0, 0.5, 1],
-        outputRange: [10, 0, 0],
-    });
-
-    const fade2 = animation.interpolate({
-        inputRange: [0, 0.5, 1],
-        outputRange: [0, 0, 1],
-    });
-    const translate2 = animation.interpolate({
-        inputRange: [0, 0.5, 1],
-        outputRange: [10, 10, 0],
-    });
+    const animatedStyles = {
+        portraitFadeAnim: useAnimatedStyle(() => {
+            return {
+                opacity: portraitFade.value,
+            };
+        }),
+        descFadeAnim: useAnimatedStyle(() => {
+            return {
+                opacity: descFade.value,
+            };
+        }),
+        nameFadeAnim: useAnimatedStyle(() => {
+            return {
+                opacity: nameFade.value,
+            };
+        }),
+        titleFadeAnim: useAnimatedStyle(() => {
+            return {
+                opacity: titleFade.value,
+            };
+        }),
+    };
 
     const styles = StyleSheet.create({
         container: {
@@ -156,54 +172,58 @@ export default function Badge(props: BadgeComponentType) {
         },
     });
     return (
-        <View style={styles.container}>
-            {/* Stripes */}
-            <Svg style={styles.svg} width={props.size} height={props.size * 2} viewBox="0 0 300 600" fill="none">
-                <G clip-path="url(#clip0_2_3)">
-                    <Rect width="300" height="600" fill="white" />
-                    <G clip-path="url(#clip1_2_3)">
-                        <Rect width="500" height="500" transform="translate(211.576 -236) rotate(55)" fill="white" />
-                        <Rect x="-200" y="50" width="500" height="200" transform="rotate(-35 -200 50)" fill="#03FFCC" />
-                        <Rect x="-70" y="230" width="500" height="15" transform="rotate(-35 -70 230)" fill="#CBF7E6" />
-                        <Rect x="-60" y="255" width="500" height="3" transform="rotate(-35 -60 255)" fill="#EDA0F2" />
-                    </G>
-                </G>
-                <Defs>
-                    <ClipPath id="clip0_2_3">
-                        <Rect width="300" height="600" fill="white" />
-                    </ClipPath>
-                    <ClipPath id="clip1_2_3">
-                        <Rect width="500" height="500" fill="white" transform="translate(211.576 -236) rotate(55)" />
-                    </ClipPath>
-                </Defs>
-            </Svg>
-            {/* End stripes */}
+        <View>
+            <PanGestureHandler onGestureEvent={gestureEventHandler}>
+                <Animated.View style={styles.container}>
+                    {/* Stripes */}
+                    <Svg style={styles.svg} width={props.size} height={props.size * 2} viewBox="0 0 300 600" fill="none">
+                        <G clip-path="url(#clip0_2_3)">
+                            <Rect width="300" height="600" fill="white" />
+                            <G clip-path="url(#clip1_2_3)">
+                                <Rect width="500" height="500" transform="translate(211.576 -236) rotate(55)" fill="white" />
+                                <Rect x="-200" y="50" width="500" height="200" transform="rotate(-35 -200 50)" fill="#03FFCC" />
+                                <Rect x="-70" y="230" width="500" height="15" transform="rotate(-35 -70 230)" fill="#CBF7E6" />
+                                <Rect x="-60" y="255" width="500" height="3" transform="rotate(-35 -60 255)" fill="#EDA0F2" />
+                            </G>
+                        </G>
+                        <Defs>
+                            <ClipPath id="clip0_2_3">
+                                <Rect width="300" height="600" fill="white" />
+                            </ClipPath>
+                            <ClipPath id="clip1_2_3">
+                                <Rect width="500" height="500" fill="white" transform="translate(211.576 -236) rotate(55)" />
+                            </ClipPath>
+                        </Defs>
+                    </Svg>
+                    {/* End stripes */}
 
-            {/* Waifu Portrait */}
-            <Animated.View style={[portrait.container, { opacity: fade1 }, { transform: [{ translateY: translate1 }] }]}>
-                <Image source={{ uri: props.imageUri }} style={portrait.doubleBorder}></Image>
-                <View style={portrait.floatingSquare}></View>
-                <View style={portrait.starContainer}>
-                    {[...Array(props.stars)].map((_: undefined, i: number) => {
-                        return <StarIcon style={portrait.star} size={0.2 * portraitSize} color={props.primaryColor} stroke={props.secondaryColor} strokeWidth={0.2 * portraitSize} key={i}></StarIcon>;
-                    })}
-                </View>
-            </Animated.View>
-            {/* End waifu portrait */}
+                    {/* Waifu Portrait */}
+                    <Animated.View style={[portrait.container, animatedStyles.portraitFadeAnim]}>
+                        <Image source={{ uri: props.imageUri }} style={portrait.doubleBorder}></Image>
+                        <View style={portrait.floatingSquare}></View>
+                        <View style={portrait.starContainer}>
+                            {[...Array(props.stars)].map((_: undefined, i: number) => {
+                                return <StarIcon style={portrait.star} size={0.2 * portraitSize} color={props.primaryColor} stroke={props.secondaryColor} strokeWidth={0.2 * portraitSize} key={i}></StarIcon>;
+                            })}
+                        </View>
+                    </Animated.View>
+                    {/* End waifu portrait */}
 
-            <Animated.View style={[styles.cardDesc, { opacity: fade2 }, { transform: [{ translateY: translate2 }] }]}>
-                <View style={styles.descItemContainer}>
-                    <View style={styles.smallSquare}></View>
-                    <Text>line 1</Text>
-                </View>
-                <View style={styles.descItemContainer}>
-                    <View style={styles.smallSquare}></View>
-                    <Text>line 2</Text>
-                </View>
-            </Animated.View>
+                    <Animated.View style={[styles.cardDesc, animatedStyles.descFadeAnim]}>
+                        <View style={styles.descItemContainer}>
+                            <View style={styles.smallSquare}></View>
+                            <Text>line 1</Text>
+                        </View>
+                        <View style={styles.descItemContainer}>
+                            <View style={styles.smallSquare}></View>
+                            <Text>line 2</Text>
+                        </View>
+                    </Animated.View>
 
-            <Animated.Text style={[styles.nameFont, { opacity: fade1 }, { transform: [{ translateY: translate1 }] }]}>{props.name}</Animated.Text>
-            <Animated.Text style={[styles.titleFont, { opacity: fade2 }, { transform: [{ translateY: translate2 }] }]}>{props.title}</Animated.Text>
+                    <Animated.Text style={[styles.nameFont, animatedStyles.nameFadeAnim]}>{props.name}</Animated.Text>
+                    <Animated.Text style={[styles.titleFont, animatedStyles.titleFadeAnim]}>{props.title}</Animated.Text>
+                </Animated.View>
+            </PanGestureHandler>
         </View>
     );
 }

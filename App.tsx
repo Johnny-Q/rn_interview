@@ -21,7 +21,7 @@ export default function App() {
     return (
         <View style={styles.container}>
             <Badge size={300} name="name" title="title" stars={6} imageUri={imageUri} primaryColor={"#03FFCC"} secondaryColor={"#EDA0F2"}/>
-            <Badge size={150} name="name" title="title" stars={3} imageUri={imageUri} primaryColor={"#03FFCC"} secondaryColor={"#EDA0F2"}/>
+            {/* <Badge size={150} name="name" title="title" stars={3} imageUri={imageUri} primaryColor={"#03FFCC"} secondaryColor={"#EDA0F2"}/> */}
         </View>
     );
 }
