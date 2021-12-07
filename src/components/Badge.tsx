@@ -2,6 +2,7 @@ import React from "react";
 import { StyleSheet, Text, View, Image } from "react-native";
 import Svg, { Rect, ClipPath, Defs, G } from "react-native-svg";
 import { StarIcon } from "./StarIcon";
+/* part 2 commit change */
 type BadgeComponentType = {
     size: number;
     name: string;

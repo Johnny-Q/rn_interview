@@ -3,6 +3,7 @@ import React from "react";
 import { StyleSheet, Text, View, Image} from "react-native";
 import Waifu from "./assets/waifu.png";
 import Badge from "./src/components/Badge";
+/* part 2 commit change */
 export default function App() {
     const imageUri = Image.resolveAssetSource(Waifu).uri;
     console.log(imageUri);
