@@ -180,7 +180,7 @@ export default function Badge(props: BadgeComponentType) {
             {/* End stripes */}
 
             {/* Waifu Portrait */}
-            <Animated.View style={[portrait.container, { opacity: fade1 }, {transform:[{translateY: translate1}] }]}>
+            <Animated.View style={[portrait.container, { opacity: fade1 }, { transform: [{ translateY: translate1 }] }]}>
                 <Image source={{ uri: props.imageUri }} style={portrait.doubleBorder}></Image>
                 <View style={portrait.floatingSquare}></View>
                 <View style={portrait.starContainer}>
@@ -191,7 +191,7 @@ export default function Badge(props: BadgeComponentType) {
             </Animated.View>
             {/* End waifu portrait */}
 
-            <Animated.View style={[styles.cardDesc, { opacity: fade2 }, {transform:[{translateY: translate2}]}]}>
+            <Animated.View style={[styles.cardDesc, { opacity: fade2 }, { transform: [{ translateY: translate2 }] }]}>
                 <View style={styles.descItemContainer}>
                     <View style={styles.smallSquare}></View>
                     <Text>line 1</Text>
@@ -202,8 +202,8 @@ export default function Badge(props: BadgeComponentType) {
                 </View>
             </Animated.View>
 
-            <Animated.Text style={[styles.nameFont, {opacity: fade1}, {transform:[{translateY: translate1}]}]}>{props.name}</Animated.Text>
-            <Animated.Text style={[styles.titleFont, {opacity: fade2}, {transform:[{translateY: translate2}]}]}>{props.title}</Animated.Text>
+            <Animated.Text style={[styles.nameFont, { opacity: fade1 }, { transform: [{ translateY: translate1 }] }]}>{props.name}</Animated.Text>
+            <Animated.Text style={[styles.titleFont, { opacity: fade2 }, { transform: [{ translateY: translate2 }] }]}>{props.title}</Animated.Text>
         </View>
     );
 }
