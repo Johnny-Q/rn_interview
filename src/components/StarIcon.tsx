@@ -1,6 +1,5 @@
 import React from "react";
 import Svg, { SvgProps, Path } from "react-native-svg";
-/* part 2 commit change */
 export type StarIconProps = {
     borderWidth?: number;
     color?: string;

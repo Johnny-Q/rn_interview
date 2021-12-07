@@ -1,8 +1,7 @@
-import React from "react";
-import { StyleSheet, Text, View, Image } from "react-native";
+import React, { useRef, useEffect } from "react";
+import { StyleSheet, Text, View, Image, Animated } from "react-native";
 import Svg, { Rect, ClipPath, Defs, G } from "react-native-svg";
 import { StarIcon } from "./StarIcon";
-/* part 2 commit change */
 type BadgeComponentType = {
     size: number;
     name: string;
@@ -13,6 +12,33 @@ type BadgeComponentType = {
     secondaryColor: string;
 };
 export default function Badge(props: BadgeComponentType) {
+    const animation = useRef(new Animated.Value(0)).current;
+    useEffect(() => {
+        Animated.timing(animation, {
+            toValue: 1,
+            duration: 1000,
+            useNativeDriver: false,
+        }).start();
+    }, []);
+
+    const fade1 = animation.interpolate({
+        inputRange: [0, 0.5, 1],
+        outputRange: [0, 1, 1],
+    });
+    const translate1 = animation.interpolate({
+        inputRange: [0, 0.5, 1],
+        outputRange: [10, 0, 0],
+    });
+
+    const fade2 = animation.interpolate({
+        inputRange: [0, 0.5, 1],
+        outputRange: [0, 0, 1],
+    });
+    const translate2 = animation.interpolate({
+        inputRange: [0, 0.5, 1],
+        outputRange: [10, 10, 0],
+    });
+
     const styles = StyleSheet.create({
         container: {
             alignItems: "center",
@@ -54,14 +80,18 @@ export default function Badge(props: BadgeComponentType) {
 
             aspectRatio: 1 / 1,
             width: 10,
-            margin: 5
+            margin: 5,
+        },
+        nameContainer: {
+            alignItems: "center",
+            justifyContent: "center",
         },
         nameFont: {
             fontSize: 32,
-            margin: 5
+            margin: 5,
         },
         titleFont: {
-            fontSize: 16
+            fontSize: 16,
         },
     });
 
@@ -150,30 +180,30 @@ export default function Badge(props: BadgeComponentType) {
             {/* End stripes */}
 
             {/* Waifu Portrait */}
-            <View style={portrait.container}>
+            <Animated.View style={[portrait.container, { opacity: fade1 }, {transform:[{translateY: translate1}] }]}>
                 <Image source={{ uri: props.imageUri }} style={portrait.doubleBorder}></Image>
                 <View style={portrait.floatingSquare}></View>
                 <View style={portrait.starContainer}>
                     {[...Array(props.stars)].map((_: undefined, i: number) => {
-                        return <StarIcon style={portrait.star} size={0.2 * portraitSize} color={props.primaryColor} stroke={props.secondaryColor} strokeWidth={0.2 * portraitSize}></StarIcon>;
+                        return <StarIcon style={portrait.star} size={0.2 * portraitSize} color={props.primaryColor} stroke={props.secondaryColor} strokeWidth={0.2 * portraitSize} key={i}></StarIcon>;
                     })}
                 </View>
-            </View>
+            </Animated.View>
             {/* End waifu portrait */}
 
-            <View style={styles.cardDesc}>
+            <Animated.View style={[styles.cardDesc, { opacity: fade2 }, {transform:[{translateY: translate2}]}]}>
                 <View style={styles.descItemContainer}>
                     <View style={styles.smallSquare}></View>
                     <Text>line 1</Text>
                 </View>
                 <View style={styles.descItemContainer}>
                     <View style={styles.smallSquare}></View>
-                    <Text>line 1</Text>
+                    <Text>line 2</Text>
                 </View>
-            </View>
+            </Animated.View>
 
-            <Text style={styles.nameFont}>Name</Text>
-            <Text style={styles.titleFont}>Title</Text>
+            <Animated.Text style={[styles.nameFont, {opacity: fade1}, {transform:[{translateY: translate1}]}]}>{props.name}</Animated.Text>
+            <Animated.Text style={[styles.titleFont, {opacity: fade2}, {transform:[{translateY: translate2}]}]}>{props.title}</Animated.Text>
         </View>
     );
 }
