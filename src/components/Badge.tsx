@@ -34,6 +34,34 @@ export default function Badge(props: BadgeComponentType) {
             top: 0,
             left: 0,
         },
+        cardDesc: {
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+
+            width: 0.7 * props.size,
+
+            margin: 10,
+        },
+        descItemContainer: {
+            alignItems: "center",
+            justifyContent: "center",
+            flexDirection: "row",
+        },
+        smallSquare: {
+            backgroundColor: "black",
+
+            aspectRatio: 1 / 1,
+            width: 10,
+            margin: 5
+        },
+        nameFont: {
+            fontSize: 32,
+            margin: 5
+        },
+        titleFont: {
+            fontSize: 16
+        },
     });
 
     const portraitSize = 0.8 * props.size;
@@ -50,6 +78,8 @@ export default function Badge(props: BadgeComponentType) {
             borderRadius: 0.1 * portraitSize,
             borderColor: props.secondaryColor,
             borderWidth: portraitBorderWidth,
+
+            margin: 0.1 * portraitSize,
         },
         doubleBorder: {
             width: portraitSize,
@@ -118,6 +148,7 @@ export default function Badge(props: BadgeComponentType) {
             </Svg>
             {/* End stripes */}
 
+            {/* Waifu Portrait */}
             <View style={portrait.container}>
                 <Image source={{ uri: props.imageUri }} style={portrait.doubleBorder}></Image>
                 <View style={portrait.floatingSquare}></View>
@@ -127,6 +158,21 @@ export default function Badge(props: BadgeComponentType) {
                     })}
                 </View>
             </View>
+            {/* End waifu portrait */}
+
+            <View style={styles.cardDesc}>
+                <View style={styles.descItemContainer}>
+                    <View style={styles.smallSquare}></View>
+                    <Text>line 1</Text>
+                </View>
+                <View style={styles.descItemContainer}>
+                    <View style={styles.smallSquare}></View>
+                    <Text>line 1</Text>
+                </View>
+            </View>
+
+            <Text style={styles.nameFont}>Name</Text>
+            <Text style={styles.titleFont}>Title</Text>
         </View>
     );
 }
