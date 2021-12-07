@@ -1,7 +1,7 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { StyleSheet, Text, View, Image, PanResponder } from "react-native";
 import { PanGestureHandler } from "react-native-gesture-handler";
-import Animated, { interpolate, useAnimatedGestureHandler, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
+import Animated, { Extrapolate, interpolate, useAnimatedGestureHandler, useAnimatedStyle, useSharedValue, withTiming, runOnJS } from "react-native-reanimated";
 import Svg, { Rect, ClipPath, Defs, G } from "react-native-svg";
 import { StarIcon } from "./StarIcon";
 type BadgeComponentType = {
@@ -14,23 +14,52 @@ type BadgeComponentType = {
     secondaryColor: string;
 };
 export default function Badge(props: BadgeComponentType) {
+    const [flipped, setFlipped] = useState(false);
     // const fadeValue = useRef(new Animated.Value(0)).current;
+    const fadeValue = useSharedValue(0);
     const portraitFade = useSharedValue(0);
     const descFade = useSharedValue(0);
     const nameFade = useSharedValue(0);
     const titleFade = useSharedValue(0);
 
-    const gestureEventHandler = useAnimatedGestureHandler({
+    const rotation = useSharedValue(0);
+    const offset = useSharedValue(0);
 
+    const gestureEventHandler = useAnimatedGestureHandler({
+        onStart: (e) => {
+            offset.value = e.absoluteX;
+        },
+        onActive: (e) => {
+            if (flipped) return;
+            rotation.value = e.absoluteX - offset.value;
+
+            if (rotation.value < 0) rotation.value = 0;
+            if (rotation.value > props.size) rotation.value = props.size;
+            console.log(e, rotation.value);
+        },
+        onEnd: (e) => {
+            if (flipped) return;
+            //swiped more than halfway through the card, just complete the swipe animation
+            if (rotation.value > props.size / 2) {
+                console.log("asdf");
+                rotation.value = withTiming(props.size, { duration: 200 }, () => {
+                    runOnJS(setFlipped)(true);
+                });
+            } else {
+                rotation.value = withTiming(0, { duration: 200 });
+            }
+        },
     });
     useEffect(() => {
-        portraitFade.value = withTiming(1, { duration: 500 }, () => {
-            descFade.value = withTiming(1, { duration: 500 });
-        });
-        nameFade.value = withTiming(1, { duration: 500 }, () => {
-            titleFade.value = withTiming(1, { duration: 500 });
-        });
-    }, []);
+        if (flipped) {
+            portraitFade.value = withTiming(1, { duration: 500 }, () => {
+                descFade.value = withTiming(1, { duration: 500 });
+            });
+            nameFade.value = withTiming(1, { duration: 500 }, () => {
+                titleFade.value = withTiming(1, { duration: 500 });
+            });
+        }
+    }, [flipped]);
 
     const animatedStyles = {
         portraitFadeAnim: useAnimatedStyle(() => {
@@ -51,6 +80,16 @@ export default function Badge(props: BadgeComponentType) {
         titleFadeAnim: useAnimatedStyle(() => {
             return {
                 opacity: titleFade.value,
+            };
+        }),
+        rotationAnim: useAnimatedStyle(() => {
+            const rotate = interpolate(rotation.value, [0, props.size / 2, props.size], [-180, -90, 0]);
+            return {
+                transform: [
+                    {
+                        rotateY: `${rotate}deg`,
+                    },
+                ],
             };
         }),
     };
@@ -174,7 +213,7 @@ export default function Badge(props: BadgeComponentType) {
     return (
         <View>
             <PanGestureHandler onGestureEvent={gestureEventHandler}>
-                <Animated.View style={styles.container}>
+                <Animated.View style={[styles.container, animatedStyles.rotationAnim]}>
                     {/* Stripes */}
                     <Svg style={styles.svg} width={props.size} height={props.size * 2} viewBox="0 0 300 600" fill="none">
                         <G clip-path="url(#clip0_2_3)">
