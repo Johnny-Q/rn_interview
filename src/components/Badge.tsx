@@ -15,71 +15,71 @@ type BadgeComponentType = {
 };
 export default function Badge(props: BadgeComponentType) {
     const [flipped, setFlipped] = useState(false);
-    // const fadeValue = useRef(new Animated.Value(0)).current;
-    const fadeValue = useSharedValue(0);
-    const portraitFade = useSharedValue(0);
-    const descFade = useSharedValue(0);
-    const nameFade = useSharedValue(0);
-    const titleFade = useSharedValue(0);
+    const fadeIn = useSharedValue(0);
+    const cardDescFadeIn = useSharedValue(0);
 
     const rotation = useSharedValue(0);
     const offset = useSharedValue(0);
 
     const gestureEventHandler = useAnimatedGestureHandler({
         onStart: (e) => {
+            //mark the start of the swipe
             offset.value = e.absoluteX;
         },
         onActive: (e) => {
-            if (flipped) return;
+            if (flipped) return; //if the card was already flipped, don't do the swipe
             rotation.value = e.absoluteX - offset.value;
 
+            //bound the rotation
             if (rotation.value < 0) rotation.value = 0;
             if (rotation.value > props.size) rotation.value = props.size;
-            console.log(e, rotation.value);
         },
         onEnd: (e) => {
             if (flipped) return;
+
             //swiped more than halfway through the card, just complete the swipe animation
-            if (rotation.value > props.size / 2) {
-                console.log("asdf");
+            if (rotation.value >= props.size) { //if the user flipped the card all the way, mark the badge as flipped
+                runOnJS(setFlipped)(true); 
+            } else if (rotation.value > props.size / 2) { //if the card was half flipped, complete the animation and mark the badge as flipped
                 rotation.value = withTiming(props.size, { duration: 200 }, () => {
-                    runOnJS(setFlipped)(true);
+                    runOnJS(setFlipped)(true); //
                 });
-            } else {
+            } else { //reset the badge to it's original position with an animation
                 rotation.value = withTiming(0, { duration: 200 });
             }
         },
     });
+
+    //once the badge is flipped, load in the other details
     useEffect(() => {
         if (flipped) {
-            portraitFade.value = withTiming(1, { duration: 500 }, () => {
-                descFade.value = withTiming(1, { duration: 500 });
-            });
-            nameFade.value = withTiming(1, { duration: 500 }, () => {
-                titleFade.value = withTiming(1, { duration: 500 });
-            });
+            fadeIn.value = withTiming(2, { duration: 1000 });
         }
     }, [flipped]);
 
     const animatedStyles = {
         portraitFadeAnim: useAnimatedStyle(() => {
             return {
-                opacity: portraitFade.value,
-            };
-        }),
-        descFadeAnim: useAnimatedStyle(() => {
-            return {
-                opacity: descFade.value,
+                opacity: interpolate(fadeIn.value, [0, 1, 2], [0, 1, 1]),
+                transform: [{ translateY: interpolate(fadeIn.value, [0, 1, 2], [10, 0, 0]) }],
             };
         }),
         nameFadeAnim: useAnimatedStyle(() => {
             return {
-                opacity: nameFade.value,
+                opacity: interpolate(fadeIn.value, [0, 1, 2], [0, 1, 1]),
+                transform: [{ translateY: interpolate(fadeIn.value, [0, 1, 2], [10, 0, 0]) }],
+            };
+        }),
+        descFadeAnim: useAnimatedStyle(() => {
+            return {
+                opacity: interpolate(fadeIn.value, [0, 1, 2], [0, 0, 1]),
+                transform: [{ translateY: interpolate(fadeIn.value, [0, 1, 2], [10, -10, 0]) }],
             };
         }),
         titleFadeAnim: useAnimatedStyle(() => {
             return {
-                opacity: titleFade.value,
+                opacity: interpolate(fadeIn.value, [0, 1, 2], [0, 0, 1]),
+                transform: [{ translateY: interpolate(fadeIn.value, [0, 1, 2], [10, -10, 0]) }],
             };
         }),
         rotationAnim: useAnimatedStyle(() => {
@@ -94,7 +94,7 @@ export default function Badge(props: BadgeComponentType) {
         }),
     };
 
-    const styles = StyleSheet.create({
+    const badgeStyles = StyleSheet.create({
         container: {
             alignItems: "center",
             justifyContent: "center",
@@ -213,9 +213,9 @@ export default function Badge(props: BadgeComponentType) {
     return (
         <View>
             <PanGestureHandler onGestureEvent={gestureEventHandler}>
-                <Animated.View style={[styles.container, animatedStyles.rotationAnim]}>
+                <Animated.View style={[badgeStyles.container, animatedStyles.rotationAnim]}>
                     {/* Stripes */}
-                    <Svg style={styles.svg} width={props.size} height={props.size * 2} viewBox="0 0 300 600" fill="none">
+                    <Svg style={badgeStyles.svg} width={props.size} height={props.size * 2} viewBox="0 0 300 600" fill="none">
                         <G clip-path="url(#clip0_2_3)">
                             <Rect width="300" height="600" fill="white" />
                             <G clip-path="url(#clip1_2_3)">
@@ -248,19 +248,19 @@ export default function Badge(props: BadgeComponentType) {
                     </Animated.View>
                     {/* End waifu portrait */}
 
-                    <Animated.View style={[styles.cardDesc, animatedStyles.descFadeAnim]}>
-                        <View style={styles.descItemContainer}>
-                            <View style={styles.smallSquare}></View>
+                    <Animated.View style={[badgeStyles.cardDesc, animatedStyles.descFadeAnim]}>
+                        <View style={badgeStyles.descItemContainer}>
+                            <View style={badgeStyles.smallSquare}></View>
                             <Text>line 1</Text>
                         </View>
-                        <View style={styles.descItemContainer}>
-                            <View style={styles.smallSquare}></View>
+                        <View style={badgeStyles.descItemContainer}>
+                            <View style={badgeStyles.smallSquare}></View>
                             <Text>line 2</Text>
                         </View>
                     </Animated.View>
 
-                    <Animated.Text style={[styles.nameFont, animatedStyles.nameFadeAnim]}>{props.name}</Animated.Text>
-                    <Animated.Text style={[styles.titleFont, animatedStyles.titleFadeAnim]}>{props.title}</Animated.Text>
+                    <Animated.Text style={[badgeStyles.nameFont, animatedStyles.nameFadeAnim]}>{props.name}</Animated.Text>
+                    <Animated.Text style={[badgeStyles.titleFont, animatedStyles.titleFadeAnim]}>{props.title}</Animated.Text>
                 </Animated.View>
             </PanGestureHandler>
         </View>
